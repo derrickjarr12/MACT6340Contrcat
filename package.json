@@ -1,0 +1,25 @@
+{
+  "name": "mact6340contract",
+  "version": "1.0.0",
+  "description": "THis is the smart contract for my nft mint for MACT6340 course",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/derrickjarr12/MACT6340Contrcat.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/derrickjarr12/MACT6340Contrcat/issues"
+  },
+  "homepage": "https://github.com/derrickjarr12/MACT6340Contrcat#readme",
+  "dependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^6.1.0",
+    "@openzeppelin/contracts": "^5.4.0",
+    "dotenv": "^17.2.3"
+  }
+}
