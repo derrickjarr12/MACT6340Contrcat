@@ -9,7 +9,7 @@ const {hre, ethers, run, network} = require("hardhat");
 async function main() {
     const args = {
         // define aruguments for deployment here
-        mint_price: "200000000000000", //0.02 ETH
+        mint_price: "10000000000000", // 0.00001 POL (very low for testing)
         max_tokens: 3,
         base_uri: "https://ipfs.io/ipfs/bafkreidr5a7hvyiilxfug2yqpbkdowcahpbsw4jszstz6iur5ae5dx7b54",
         royaltyArtist: process.env.STUNT_WALLET_ADDRESS,
