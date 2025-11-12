@@ -4,17 +4,21 @@ const { ethers } = require("hardhat");
 describe("SEIZNFTContract", async function () {
     let SEIZNFTContractFactory; 
     let SEIZNFTContract;
+    let owner, artist, buyer;
     let args = {
         mint_price: "200000000000000", //0.02 ETH
         max_tokens: 3,
         base_uri:
         "https://ipfs.io/ipfs/bafkreidr5a7hvyiilxfug2yqpbkdowcahpbsw4jszstz6iur5ae5dx7b54",
-        royaltyArtist: "0x8A1b6FfD5E6E2b1c3c3b3F4D5E6E7F8G9H0I1J2K", //example address
+        royaltyArtist: null, // Will be set in beforeEach
         royaltyBasis:500,
 
     };
 
     this.beforeEach(async function () {
+        [owner, artist, buyer] = await ethers.getSigners();
+        args.royaltyArtist = artist.address; // Use actual test address
+        
         SEIZNFTContractFactory = await ethers.getContractFactory(
             "SEIZNFTContract"
         );
@@ -27,33 +31,20 @@ describe("SEIZNFTContract", async function () {
             args.royaltyBasis
         );
 
-        await SEIZNFTContract.waitForDeployment(
-            args.mint_price,
-            args.max_tokens,
-            args.base_uri,
-            args.royaltyArtist,
-            args.royaltyBasis
-        );
+        await SEIZNFTContract.waitForDeployment();
     });
     describe("construction and initialization", async function () {
         this.beforeEach(async function () {
             SEIZNFTContractFactory = await ethers.getContractFactory("SEIZNFTContract");
             SEIZNFTContract = await SEIZNFTContractFactory.deploy(
-            args.mint_price,
-            args.max_tokens,
-            args.base_uri,
-            args.royaltyArtist,
-            args.royaltyBasis
+                args.mint_price,
+                args.max_tokens,
+                args.base_uri,
+                args.royaltyArtist,
+                args.royaltyBasis
             );
             await SEIZNFTContract.waitForDeployment();
-            args.mint_price,
-            args.max_tokens,
-            args.base_uri,
-            args.royaltyArtist,
-            args.royaltyBasis
-            );
         });
-    });
     it("should be named SEIZNFTContract", async function () {
         const expectedValue = "SEIZNFTContract";
         const currentValue = await SEIZNFTContract.name();
@@ -96,13 +87,20 @@ describe("SEIZNFTContract", async function () {
             1,
             ethers.parseUnits("0.02", "ether")
         );
-        assert.equal(currentValue[0].toString(), expectedValue);
+        // currentValue[1] is the royalty amount, not the basis
+        // To check basis, we need to calculate: (royaltyAmount / salePrice) * 10000
+        const salePrice = ethers.parseUnits("0.02", "ether");
+        const royaltyAmount = currentValue[1];
+        const calculatedBasis = (royaltyAmount * BigInt(10000)) / salePrice;
+        assert.equal(calculatedBasis.toString(), expectedValue.toString());
     });
     it("should set owner to the deployer's address when constructed", async function () {
-        const expectedValue = "0x8A1b6FfD5E6E2b1c3c3b3F4D5E6E7F8G9H0I1J2K"; //example address
+        const [owner] = await ethers.getSigners();
+        const expectedValue = owner.address;
         const currentValue = await SEIZNFTContract.owner();
         assert.equal(currentValue.toString(), expectedValue);
-});
+    });
+    });
 describe("receive function", async function () {
     this.beforeEach(async function () {
         SEIZNFTContractFactory = await ethers.getContractFactory(
@@ -117,23 +115,16 @@ describe("receive function", async function () {
             args.royaltyBasis
         );
         await SEIZNFTContract.waitForDeployment();
-            args.mint_price,
-            args.max_tokens,
-            args.base_uri,
-            args.royaltyArtist,
-            args.royaltyBasis
-        );
     });
     it("should be called and revert if called from low-level transaction", async function () {
         let contractAddress = await SEIZNFTContract.getAddress();
         const[owner, artist, buyer] = await ethers.getSigners();
-        expect(
+        await expect(
             buyer.sendTransaction({
                 to: contractAddress,
                 value: ethers.parseUnits("2.0", "ether"),
-            }
-        )
-    ).to.be.revertedWithCustomError(SEIZNFTContract, "ReceiveFunctionDisabled");
+            })
+        ).to.be.revertedWithCustomError(SEIZNFTContract, "SEIZNFTContract_WrongAvenueForThisTransaction");
     });
 
     describe("fallback function", async function () {
@@ -150,9 +141,7 @@ describe("receive function", async function () {
                 args.royaltyBasis
             );
             await SEIZNFTContract.waitForDeployment();
-                args.mint_price,
-                args.max_tokens,
-                args.base_uri,
-                args.royaltyArtist,
-                args.royaltyBasis
+        });
+    });
+});
 });
