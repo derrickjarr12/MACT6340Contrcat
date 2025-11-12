@@ -27,14 +27,7 @@ async function main() {
         args.royaltyBasis
     );
     console.log("Deploying...");
-    await SEIZNFTContract.waitForDeployment(
-        args.mint_price,
-        args.max_tokens,
-        args.base_uri,
-        args.royaltyArtist,
-        args.royaltyBasis
-
-    );
+    await SEIZNFTContract.waitForDeployment();
     console.log("Waiting for block verification...");
     await SEIZNFTContract.deploymentTransaction().wait(15);
     let contractAddress = await SEIZNFTContract.getAddress();
@@ -89,14 +82,15 @@ async function main() {
                 constructorArguments: args,
             });
         } catch (err) {
-            if (e.message.toLowerCase().includes("already verified")) {
+            if (err.message.toLowerCase().includes("already verified")) {
                 console.log("Already verified!");
             } else {
                 console.log(err);
             }
         }
+    }
+
 main().catch((error) => {
     console.error(error);
     process.exitCode = 1;
 });
-    }
